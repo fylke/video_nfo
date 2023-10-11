@@ -8,7 +8,7 @@ function tokenize_filename {
     Artist=${Title%\ -*}
     local TrackAndInfo=${Title#*-\ }
     Track=${TrackAndInfo%\ \(*}
-    local InfoAndParen=${TrackAndInfo#*\(}
+    local InfoAndParen=${TrackAndInfo##*\(}
     Info=${InfoAndParen%\)*}
 }
 
@@ -29,22 +29,24 @@ function write_nfo_file {
 }
 
 function tokenize_info {
-    case ${Info} in
-        *", "*)
-	        Premiered=${Info#*,\ }
-            ;&
-        *"Live"*)
-            Tags+="Live performance"${IFS}
-            ;&
-        *"Official"*)
-            Tags+="Official video"${IFS}
-            ;&
-        *"Drumcam"*)
-            Tags+="Drumcam"${IFS}
-            ;;
-        *)
-            ;;
-    esac
+    # Need to clear these for each file
+    Tags=""
+    Premiered=""
+    if [[ ${Info} == *", "* ]]; then
+	    Premiered=${Info#*,\ }
+    fi
+    if [[ ${Info} == *"Live"* ]]; then
+        Tags+="Live performance"${IFS}
+    fi
+    if [[ ${Info} == *"Official"* ]]; then
+        Tags+="Official video"${IFS}
+    fi
+    if [[ ${Info} == *"Promo"* ]]; then
+        Tags+="Promo video"${IFS}
+    fi
+    if [[ ${Info} == *"Drumcam"* ]]; then
+        Tags+="Drumcam"${IFS}
+    fi
 }
 
 usage() { echo "Usage: $0 -d <video directory>" 1>&2; exit 1; }
