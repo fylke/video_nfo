@@ -4,11 +4,10 @@
 IFS=$'\n'
 
 function tokenize_filename {
-    Title=$(echo ${Filename} | tr _ ' ')
-    Artist=${Title%\ -*}
-    local TrackAndInfo=${Title#*-\ }
-    Track=${TrackAndInfo%\ \(*}
-    local InfoAndParen=${TrackAndInfo##*\(}
+    local FullName=$(echo ${Filename} | tr _ ' ')
+    Artist=${FullName%%\ -*}
+    Title=${FullName#*-\ }
+    local InfoAndParen=${Title##*\(}
     Info=${InfoAndParen%\)*}
 }
 
@@ -17,7 +16,6 @@ function write_nfo_file {
 	echo "<musicvideo>" >> ${NfoFile}
 	echo "    <title>${Title}</title>" >> ${NfoFile}
 	echo "    <artist>${Artist}</artist>" >> ${NfoFile}
-	echo "    <track>${Track}</track>" >> ${NfoFile}
 	echo "    <album>${Album}</album>" >> ${NfoFile}
 	echo "    <premiered>${Premiered}</premiered>" >> ${NfoFile}
 	echo "    <director>${Director}</director>" >> ${NfoFile}
