@@ -30,7 +30,7 @@ function tokenize_info {
     # Need to clear these for each file
     Tags=""
     Premiered=""
-    if [[ ${Info} == *", "* ]]; then
+    if [[ ${Info} =~ \W*,\ [0-9]{4}$ ]]; then
 	    Premiered=${Info#*,\ }
     fi
     if [[ ${Info} == *"Live"* ]]; then
@@ -41,6 +41,12 @@ function tokenize_info {
     fi
     if [[ ${Info} == *"Promo"* ]]; then
         Tags+="Promo video"${IFS}
+    fi
+    if [[ ${Info} == *"AI"* ]]; then
+        Tags+="AI remaster"${IFS}
+    fi
+    if [[ ${Info} == *"fan video"* ]]; then
+        Tags+="Fan video"${IFS}
     fi
     if [[ ${Info} == *"Drumcam"* ]]; then
         Tags+="Drumcam"${IFS}
