@@ -1,0 +1,6 @@
+# Generated metadata files
+*.nfo
+
+# ShellSpec coverage/report output (when enabled)
+coverage/
+report/
