@@ -33,4 +33,44 @@ Describe 'mk_video_nfo.sh'
     When call parse_info
     The variable Tags should eq $'Live performance\nOfficial video\nPromo video\nAI remaster\nFan video\nDrumcam\n'
   End
+
+  It 'generates nfo files in the output directory'
+    generate_nfo() {
+      temp_dir="$(mktemp -d)"
+      trap 'rm -rf "${temp_dir}"' EXIT
+
+      touch "${temp_dir}/A_Perfect_Circle_-_Judith_(Official_Video,_2000).mkv"
+      main -d "${temp_dir}"
+      test -f "${temp_dir}/.output/A_Perfect_Circle_-_Judith_(Official_Video,_2000).nfo"
+    }
+
+    When call generate_nfo
+    The status should be success
+  End
+
+  It 'writes expected metadata into generated nfo'
+    render_nfo() {
+      temp_dir="$(mktemp -d)"
+      trap 'rm -rf "${temp_dir}"' EXIT
+
+      touch "${temp_dir}/A_Perfect_Circle_-_Judith_(Live_Official_Promo_AI_fan video_Drumcam,_2000).mkv"
+      main -d "${temp_dir}"
+      cat "${temp_dir}/.output/A_Perfect_Circle_-_Judith_(Live_Official_Promo_AI_fan video_Drumcam,_2000).nfo"
+    }
+
+    When call render_nfo
+    The output should include '<premiered>2000</premiered>'
+    The output should include '<tag>Live performance</tag>'
+    The output should include '<tag>Official video</tag>'
+    The output should include '<tag>Promo video</tag>'
+    The output should include '<tag>AI remaster</tag>'
+    The output should include '<tag>Fan video</tag>'
+    The output should include '<tag>Drumcam</tag>'
+  End
+
+  It 'shows usage for invalid directory'
+    When run main -d /definitely/not/a/real/path
+    The status should eq 1
+    The stderr should include 'Usage:'
+  End
 End
