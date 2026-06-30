@@ -9,6 +9,7 @@
 spec_helper_precheck() {
   # Available functions: info, warn, error, abort, setenv, unsetenv
   # Available variables: VERSION, SHELL_TYPE, SHELL_VERSION
+  mkdir -p .output/coverage .output/report
   : minimum_version "0.28.1"
 }
 

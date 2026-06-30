@@ -12,7 +12,7 @@ function tokenize_filename {
 }
 
 function write_nfo_file {
-	NfoFile=${VideoDir}/${Filename}.nfo
+    NfoFile=${OutputDir}/${Filename}.nfo
 	echo "<musicvideo>" >> ${NfoFile}
 	echo "    <title>${Title}</title>" >> ${NfoFile}
 	echo "    <artist>${Artist}</artist>" >> ${NfoFile}
@@ -71,6 +71,9 @@ main() {
     done
     shift $((OPTIND-1))
 
+    OutputDir="${VideoDir}/.output"
+    mkdir -p "${OutputDir}"
+
     Filenames=""
     Files=$(find "${VideoDir}" -maxdepth 1 -type f -not -name "*.nfo")
     for File in ${Files}; do
@@ -79,7 +82,7 @@ main() {
     done
 
     for Filename in ${Filenames}; do
-        if [ ! -f "${VideoDir}/${Filename}.nfo" ]; then
+        if [ ! -f "${OutputDir}/${Filename}.nfo" ]; then
             tokenize_filename "${Filename}"
             tokenize_info "${Info}"
             write_nfo_file
