@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  shellspec:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y kcov curl
+
+      - name: Install ShellSpec
+        run: |
+          set -eu
+          tmp_dir="$(mktemp -d)"
+          trap 'rm -rf "$tmp_dir"' EXIT
+
+          curl -fsSL \
+            https://github.com/shellspec/shellspec/releases/latest/download/shellspec-dist.tar.gz \
+            -o "$tmp_dir/shellspec-dist.tar.gz"
+          tar -xzf "$tmp_dir/shellspec-dist.tar.gz" -C "$tmp_dir"
+          "$tmp_dir/shellspec/install.sh" --yes
+
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Run tests with coverage gate
+        run: |
+          set -eu
+
+          output_file="$(mktemp)"
+          shellspec | tee "$output_file"
+
+          coverage="$(sed -n 's/^Code covered: \([0-9.][0-9.]*\)%.*/\1/p' "$output_file" | tail -n1)"
+          if [ -z "$coverage" ]; then
+            echo "Could not determine line coverage from ShellSpec output"
+            exit 1
+          fi
+
+          echo "Detected line coverage: ${coverage}%"
+          awk -v cov="$coverage" 'BEGIN { if (cov + 0 < 80) { exit 1 } }'
+
+      - name: Upload coverage artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: shellspec-coverage
+          path: |
+            .output/coverage
+            .output/report
+          if-no-files-found: ignore
