@@ -55,31 +55,38 @@ function tokenize_info {
 
 usage() { echo "Usage: $0 -d <video directory>" 1>&2; exit 1; }
 
-while getopts ":d:" Flag; do
-    case "${Flag}" in
-        d)
-            VideoDir=${OPTARG}
-            if [ ! -d ${VideoDir} ]; then 
-            	usage 
-            fi
-            ;;
-        *)
-            usage
-            ;;
-    esac
-done
-shift $((OPTIND-1))
+main() {
+    while getopts ":d:" Flag; do
+        case "${Flag}" in
+            d)
+                VideoDir=${OPTARG}
+                if [ ! -d "${VideoDir}" ]; then
+                    usage
+                fi
+                ;;
+            *)
+                usage
+                ;;
+        esac
+    done
+    shift $((OPTIND-1))
 
-Files=$(find ${VideoDir} -maxdepth 1 -type f -not -name "*.nfo")
-for File in ${Files}; do
-    Extension=${File##*.}
-	Filenames+=$(basename ${File} .${Extension})${IFS}
-done
+    Filenames=""
+    Files=$(find "${VideoDir}" -maxdepth 1 -type f -not -name "*.nfo")
+    for File in ${Files}; do
+        Extension=${File##*.}
+        Filenames+=$(basename "${File}" ".${Extension}")${IFS}
+    done
 
-for Filename in ${Filenames}; do
-	if [ ! -f ${Filename}.nfo ]; then
-		tokenize_filename ${Filename}
-		tokenize_info ${Info}
-		write_nfo_file
-	fi
-done
+    for Filename in ${Filenames}; do
+        if [ ! -f "${VideoDir}/${Filename}.nfo" ]; then
+            tokenize_filename "${Filename}"
+            tokenize_info "${Info}"
+            write_nfo_file
+        fi
+    done
+}
+
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+    main "$@"
+fi
